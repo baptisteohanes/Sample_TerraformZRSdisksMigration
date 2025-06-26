@@ -30,10 +30,10 @@ variable "admin_username" {
   default     = "adminuser"
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to the SSH public key file"
+variable "admin_password" {
+  description = "Administrator password for the VM"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
+  sensitive   = true
 }
 
 variable "os_disk_size" {

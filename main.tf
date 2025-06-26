@@ -102,18 +102,14 @@ resource "azurerm_linux_virtual_machine" "main" {
   location            = azurerm_resource_group.main.location
   size                = var.vm_size
   admin_username      = var.admin_username
+  admin_password      = var.admin_password
 
-  # Disable password authentication and use SSH keys
-  disable_password_authentication = true
+  # Enable password authentication
+  disable_password_authentication = false
 
   network_interface_ids = [
     azurerm_network_interface.main.id,
   ]
-
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = file(var.ssh_public_key_path) # Update this path to your SSH public key
-  }
 
   os_disk {
     caching              = "ReadWrite"

@@ -14,7 +14,7 @@ This Terraform configuration creates a simple Azure Linux VM with an OS disk tha
 ## Key Features
 
 - **OS Disk Storage**: Uses `Standard_LRS` (NOT ZRS enabled)
-- **Authentication**: SSH key-based authentication (password disabled)
+- **Authentication**: Password-based authentication (SSH keys disabled)
 - **Security**: Network Security Group with basic inbound rules
 - **Networking**: Public and private IP addresses
 - **OS**: Ubuntu 20.04 LTS
@@ -29,11 +29,6 @@ This Terraform configuration creates a simple Azure Linux VM with an OS disk tha
 2. **Azure CLI**: Installed and authenticated
    ```powershell
    az login
-   ```
-
-3. **SSH Key Pair**: Generate if you don't have one:
-   ```powershell
-   ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
    ```
 
 ## Deployment Instructions
@@ -68,7 +63,7 @@ location           = "West US 2"
 vm_name           = "my-vm"
 vm_size           = "Standard_B2ms"
 admin_username    = "myuser"
-ssh_public_key_path = "C:/Users/YourUser/.ssh/id_rsa.pub"
+admin_password    = "YourSecurePassword123!"  # Must meet Azure password complexity requirements
 os_disk_size      = 50
 storage_account_type = "Premium_LRS"  # Options: Standard_LRS, Premium_LRS, StandardSSD_LRS, UltraSSD_LRS
 ```
@@ -86,10 +81,21 @@ The configuration specifically uses non-ZRS storage types:
 
 ## Connecting to the VM
 
-After deployment, connect via SSH:
+After deployment, you can connect to the VM using:
 
+### Option 1: SSH (if you have an SSH client)
 ```powershell
 ssh adminuser@<public_ip_address>
+```
+
+### Option 2: Azure Portal
+1. Go to the Azure Portal
+2. Navigate to your VM
+3. Click "Connect" and choose your preferred method
+
+### Option 3: RDP (if you install a desktop environment)
+```powershell
+mstsc /v:<public_ip_address>
 ```
 
 The public IP address will be displayed in the Terraform outputs.
@@ -100,9 +106,21 @@ The configuration provides these outputs:
 
 - `public_ip_address`: Public IP of the VM
 - `private_ip_address`: Private IP of the VM
-- `ssh_connection_command`: Ready-to-use SSH command
+- `ssh_connection_command`: Ready-to-use SSH command (if SSH is available)
 - `os_disk_storage_type`: Confirms the storage type (non-ZRS)
 - `os_disk_size`: Size of the OS disk
+
+## Password Requirements
+
+When setting the `admin_password` variable, ensure it meets Azure's complexity requirements:
+
+- **Length**: At least 12 characters
+- **Complexity**: Must contain 3 of the following 4 character types:
+  - Lowercase letters (a-z)
+  - Uppercase letters (A-Z)
+  - Numbers (0-9)
+  - Special characters (!@#$%^&*()_+-=[]{}|;:,.<>?)
+- **Restrictions**: Cannot contain the username or common passwords
 
 ## Cleanup
 
@@ -124,5 +142,5 @@ terraform destroy -auto-approve
 
 - The VM is accessible from the internet (0.0.0.0/0)
 - Consider restricting source IP addresses in the NSG rules
-- SSH key authentication is enabled (passwords disabled)
+- Password authentication is enabled - ensure you use a strong password
 - Update the VM regularly after deployment
