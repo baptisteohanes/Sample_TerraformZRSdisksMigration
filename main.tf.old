@@ -112,12 +112,10 @@ resource "azurerm_linux_virtual_machine" "main" {
   ]
 
   os_disk {
-    name                = "gsrfgsfgdsfg"
     caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_ZRS" # LRS (Locally Redundant Storage) - NOT ZRS enabled
+    storage_account_type = var.storage_account_type # LRS (Locally Redundant Storage) - NOT ZRS enabled
     disk_size_gb         = var.os_disk_size
-    }
-  
+  }
 
   source_image_reference {
     publisher = "Canonical"

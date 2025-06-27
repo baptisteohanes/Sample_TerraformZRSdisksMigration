@@ -56,3 +56,15 @@ variable "storage_account_type" {
     error_message = "Storage account type must be one of: Standard_LRS, Premium_LRS, StandardSSD_LRS, UltraSSD_LRS (ZRS types are excluded)."
   }
 }
+
+variable "existing_disk_id" {
+  description = "Resource ID of the existing managed disk to use as OS disk"
+  type        = string
+  default     = null
+}
+
+variable "use_existing_disk" {
+  description = "Whether to use an existing disk for OS (true) or create a new one (false)"
+  type        = bool
+  default     = false
+}

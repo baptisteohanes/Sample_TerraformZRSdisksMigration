@@ -95,7 +95,7 @@ resource "azurerm_network_interface_security_group_association" "main" {
   network_security_group_id = azurerm_network_security_group.main.id
 }
 
-# Create virtual machine with OS disk that is NOT ZRS enabled
+# Create virtual machine with configurable OS disk (new or existing)
 resource "azurerm_linux_virtual_machine" "main" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.main.name
@@ -112,17 +112,28 @@ resource "azurerm_linux_virtual_machine" "main" {
   ]
 
   os_disk {
-    name                = "gsrfgsfgdsfg"
     caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_ZRS" # LRS (Locally Redundant Storage) - NOT ZRS enabled
-    disk_size_gb         = var.os_disk_size
+    # Only set storage account type and disk size when creating new disk
+    storage_account_type = var.use_existing_disk ? null : var.storage_account_type
+    disk_size_gb         = var.use_existing_disk ? null : var.os_disk_size
+    
+    # When using existing disk, reference the managed disk parameters
+    dynamic "managed_disk" {
+      for_each = var.use_existing_disk ? [1] : []
+      content {
+        id = var.existing_disk_id
+      }
     }
-  
+  }
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts-gen2"
-    version   = "latest"
+  # Only specify source image when creating a new disk from image
+  dynamic "source_image_reference" {
+    for_each = var.use_existing_disk ? [] : [1]
+    content {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-focal"
+      sku       = "20_04-lts-gen2"
+      version   = "latest"
+    }
   }
 }

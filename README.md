@@ -1,6 +1,9 @@
-# Azure VM with Non-ZRS OS Disk - Terraform
+# Azure VM with Configurable OS Disk - Terraform
 
-This Terraform configuration creates a simple Azure Linux VM with an OS disk that is **NOT** ZRS (Zone Redundant Storage) enabled. The VM uses Standard LRS (Locally Redundant Storage) by default, which stores data within a single availability zone.
+This Terraform configuration creates a simple Azure Linux VM with configurable OS disk options. You can either:
+
+1. **Create a new OS disk** with Standard LRS (Locally Redundant Storage) - NOT ZRS enabled
+2. **Use an existing managed disk** as the OS disk
 
 ## Resources Created
 
@@ -9,15 +12,46 @@ This Terraform configuration creates a simple Azure Linux VM with an OS disk tha
 - **Public IP**: Static public IP address for external access
 - **Network Security Group**: Firewall rules allowing SSH (22) and RDP (3389)
 - **Network Interface**: Connects the VM to the virtual network
-- **Linux Virtual Machine**: Ubuntu 20.04 LTS with **non-ZRS OS disk**
+- **Linux Virtual Machine**: Ubuntu 20.04 LTS with configurable OS disk
 
 ## Key Features
 
-- **OS Disk Storage**: Uses `Standard_LRS` (NOT ZRS enabled)
+- **Configurable OS Disk**: Option to use existing disk or create new one
+- **OS Disk Storage**: Uses `Standard_LRS` by default (NOT ZRS enabled) when creating new disk
+- **Existing Disk Support**: Can attach to an already existing managed disk
 - **Authentication**: Password-based authentication (SSH keys disabled)
 - **Security**: Network Security Group with basic inbound rules
 - **Networking**: Public and private IP addresses
 - **OS**: Ubuntu 20.04 LTS
+
+## Configuration Options
+
+### Using Existing Disk
+
+To use an existing managed disk as the OS disk:
+
+1. Set `use_existing_disk = true`
+2. Provide the full resource ID of the existing disk in `existing_disk_id`
+
+Example:
+```hcl
+use_existing_disk = true
+existing_disk_id  = "/subscriptions/your-subscription-id/resourceGroups/your-rg/providers/Microsoft.Compute/disks/your-existing-disk-name"
+```
+
+### Creating New Disk (Default)
+
+To create a new OS disk:
+
+1. Set `use_existing_disk = false` (or omit it, as false is default)
+2. Configure `os_disk_size` and `storage_account_type` as needed
+
+Example:
+```hcl
+use_existing_disk    = false
+os_disk_size         = 30
+storage_account_type = "Standard_LRS"
+```
 
 ## Prerequisites
 
@@ -31,24 +65,39 @@ This Terraform configuration creates a simple Azure Linux VM with an OS disk tha
    az login
    ```
 
+3. **Existing Disk** (if using existing disk option): The managed disk must already exist in Azure
+
 ## Deployment Instructions
 
-### 1. Initialize Terraform
+### 1. Configure Variables
+
+Copy the example file and modify it:
+```powershell
+# For existing disk usage:
+Copy-Item terraform.tfvars.existing-disk.example terraform.tfvars
+
+# For new disk creation:
+Copy-Item terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` with your specific values.
+
+### 2. Initialize Terraform
 ```powershell
 terraform init
 ```
 
-### 2. Validate Configuration
+### 3. Validate Configuration
 ```powershell
 terraform validate
 ```
 
-### 3. Plan Deployment
+### 4. Plan Deployment
 ```powershell
 terraform plan
 ```
 
-### 4. Apply Configuration
+### 5. Apply Configuration
 ```powershell
 terraform apply -auto-approve
 ```
